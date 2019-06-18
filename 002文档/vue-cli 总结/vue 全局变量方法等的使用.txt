@@ -1,0 +1,113 @@
+1、全局变量专用模块  （用于公共方法，公共数据的使用（值使用））
+就是以一个特定模块来组织管理这些全局量，需要引用的地方导入该模块便好。
+
+全局变量专用模块 Global.vue
+<script type="text/javascript">
+const colorList = [
+  '#F9F900',
+  '#6FB7B7',
+  '#9999CC',
+  '#B766AD',
+  '#B87070',
+  '#FF8F59',
+  '#FFAF60',
+  '#FFDC35',
+  '#FFFF37',
+  '#B7FF4A',
+  '#28FF28',
+  '#1AFD9C',
+  '#00FFFF',
+  '#2894FF',
+  '#6A6AFF',
+  '#BE77FF',
+  '#FF77FF',
+  '#FF79BC',
+  '#FF2D2D',
+  '#ADADAD'
+]
+const colorListLength = 20
+function getRandColor () {
+  var tem = Math.round(Math.random() * colorListLength)
+  return colorList[tem]
+}
+
+export default{                            //导出方法或变量
+     colorList,
+     colorListLength,
+     getRandColor
+}
+</script>
+模块里的变量用export 暴露出去，当其它地方需要使用时，引入模块global便可。
+
+需要使用全局变量的模块 html5.vue
+<template>
+  <ul>
+    <template v-for="item in mainList">
+      <div class="projectItem" :style="'box-shadow:1px 1px 10px '+ getColor()">
+          <router-link :to="'project/'+item.id">
+            ![](item.img)
+            <span>{{item.title}}</span>
+          </router-link>
+      </div>
+    </template>
+  </ul>
+</template>
+
+<script type="text/javascript">
+
+import global_ from 'components/tool/Global'   //在要使用的组件中引入该全局模块（组件）
+
+export default {
+  data () {
+    return {
+         getColor: global_.getRandColor,    //具体的使用
+      mainList: [
+        {
+          id: 1,
+          img: require('../../assets/rankIcon.png'),
+          title: '登录界面'
+        },
+        {
+          id: 2,
+          img: require('../../assets/rankIndex.png'),
+          title: '主页'
+        }
+      ]
+    }
+  }
+}
+</script>
+<style scoped type="text/css">
+
+</style>
+
+
+2、全局变量模块挂载到Vue.prototype 里。 （用于公共方法，公共数据的使用（值使用））
+Global.js同上，在程序入口的main.js里加下面代码
+
+import global_ from './components/tool/Global'
+Vue.prototype.GLOBAL = global_
+
+挂载之后，在需要引用全局量的模块处，不需再导入全局量模块，直接用this就可以引用了，如下:
+
+<script type="text/javascript">
+export default {
+  data () {
+    return {
+      getColor: this.GLOBAL.getRandColor,    //全局变量/方法的导入和使用
+      mainList: [
+        {
+          id: 1,
+          img: require('../../assets/rankIcon.png'),
+          title: '登录界面'
+        },
+        {
+          id: 2,
+          img: require('../../assets/rankIndex.png'),
+          title: '主页'
+        }
+      ]
+    }
+  }
+}
+</script>3、使用VUEX， 较为复杂，在多个组件均需操作全局变量时使用，一处操作，变量在各处均同时变化 （使用可参见自己总结的文档，"vue全家桶+webpack"）

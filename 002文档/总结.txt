@@ -1,0 +1,136 @@
+1.小程序登录的相关内容：(模拟双向绑定)
+
+wxml:
+   <view>
+     <input class="input-item" type="text" value="{{account}}" bindinput="bindAccountInput" placeholder="请输入账号" placeholder-class="input-placeholder"/>
+  </view>
+  
+   <view>
+     <input class="input-item"  type="password" bindinput="bindPasswordInput" value="{{password}}" placeholder="请输入密码" placeholder-class="input-placeholder" />
+  </view>
+ js: 
+//绑定账号
+  bindAccountInput(e){
+    this.setData({
+      account: e.detail.value
+    })
+  },
+
+  //绑定密码
+  bindPasswordInput(e){
+    this.setData({
+      password: e.detail.value
+    })
+  },
+ //登录
+  bindLogin: function() {
+    var that = this;
+    var account=that.data.account;
+    var password=that.data.password;
+    wx.request({
+       在success之后可将返回的数据保（可包含：账号和密码,避免重复登录，和密码更改时需重新登录）存到本地 wx.setStorage()/存入了本地缓存中（在用wx.clearStorage清除之前一直存在）,
+       之后使用 wx.getStorage()取出数据作为下次免登录的凭证或用作其他页
+});
+}
+
+2.小程序之本地缓存：
+
+存入数据:
+  wx.setStorage({
+                      key:"token",
+                      data:{token:token,companyId:companyId,username:account,password:password}
+                    });
+ 
+获取数据：
+wx.getStorage({
+  key: '',
+  success: res => {
+   
+  } 
+});
+清除数据：
+wx.clearStorage();
+
+3.小程序map组建
+  <map name=""  longitude="{{longitude}}" latitude="{{latitude}}" scale="14" markers="{{markers}}" bindmarkertap="markertap"  show-location class="Map">
+  1. map组键为小程序原生组件，层级最高，在真机上将覆盖其他元素，解决:可在map组件中使用<cover-view>(note:每一个要显示的元素都要套上cover-view)
+  2. map组件中标记位置并显示相应信息，可用属性：markers:[{
+                                                           name:"车的位置",
+                                                           latitude:29.153059,
+                                                           longitude:107.144772,
+                                                           width:10, //marker的宽度
+                                                           height:30, //marker的高度 ，也可引入自定义图标做marker,通过：iconPath:"../../imgs/window5.png",
+
+                                                          callout:{color:"#fff",fontSize:12,bgColor:"#388ce4",display:'ALWAYS',borderRadius:5,padding:5,content:`渝Q\n2016\n2015`}
+                                                        }]
+10.js 获取屏幕宽高 
+
+一、
+对于IE9+、chrome、firefox、Opera、Safari：
+window.innerHeight浏览器窗口的内部高度；
+window.innerWidth浏览器窗口的内部宽度；
+
+.对于IE8.7.6.5:
+document.documentElement.clientHeight:表示HTML文档所在窗口的当前高度；
+document.documentElement.clientWidth:表示HTML文档所在窗口的当前宽度；
+或者，因为document对象的body属性对应HTML文档的<body>标签，所以也可表示为：
+document.body.clientHeight：表示HTML文档所在窗口的当前高度；
+document.body.clientWidth：表示HTML文档所在窗口的当前宽度；
+
+结论：
+document.body.clientWidth/Height：的宽高偏小，高甚至默认200；
+document.documentElement.clientWidth/Height 和 window.innerWidth/Height 的宽高始终相等。
+所以在不同浏览器都实用的的Javascripit方案：
+
+var w = document.documentElement.clientWidth || document.body.clientWidth;
+var h = document.documentElement.clientHeight || document.body.clientHeight;
+
+二、
+网页正文全文宽高
+scrollWidth和scrollHeight获取网页内容高度和宽度
+1.针对IE.Opera：scrollHeight是网页内容实际高度，可以小于clientHeight;
+2.针对NS.firefox：scrollHeight是网页内容高度，不过最小值是clientHeight;也就是说网页内容实际高度小于clientHeight的时候，scrollHeight返回clientHeight；
+3.浏览器兼容代码：
+
+var w = document.documentElement.scrollWidth || document.body.scrollWidth;
+var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+11.在vue框架中使用 echarts
+   1. npm install echarts --save
+   2. main.js中添加 import echarts from "echarts"
+
+   
+12. @文攀 http://www.daimabiji.com/othercode/2072.html 水文地址
+
+
+//动态确定回放模块的ruler到x轴坐标
+rulerLeft=(fullScreenWidth*0.6)+((fullScreenWidth*0.4-515)/2+35)
+
+//确定鼠标在浏览器中的坐标函数
+function getMousePos(){
+  var e=e||window.event;
+      var scrollX=document.documentElement.scrollLeft||document.body.scrollLeft;//分别兼容ie和chrome
+      var scrollY=document.documentElement.scrollTop||document.body.scrollTop;
+      var x=e.pageX||(e.clientX+scrollX);//兼容火狐和其他浏览器
+      var y=e.pageY||(e.clientY+scrollY);
+      console.log(x+"--"+y);
+}
+
+13.获取当前日期的0点和23点
+   0点： new Date(new Date(new Date().toLocaleDateString()).getTime())
+   23点：new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1)
+
+ <el-table-column
+               prop="test7"
+               label="test7"
+               sortable>
+                  <template slot-scope="scope">
+                      <span @mouseenter="handleClick(scope.row.index)" v-if="scope.row.test7>=6" :class="['red',isHover==scope.row.index?'orange':'']">{{scope.row.test7}}</span>
+                      <span v-else @mouseenter="handleClick(scope.row.index)" :class="['black',isHover==scope.row.index?'orange':'']">{{scope.row.test7}}</span>
+                  </template>
+             </el-table-column>
+
+
+{"results":[{"deviceNumber":"TH610018031252","companyName":"和平物流","vehicleNo":"渝D86529",
+"name":null,"type":null,"rs":null,"points":[{"maddress":"1","aname":"温度","bname":"温度1","min":3.0,"max":30.0,"data":13.3,"dataTime":"2018-11-22 14:37:33","state":0,"status":"正常"},{"maddress":"33","aname":"温度","bname":"温度2","min":5.0,"max":30.0,"data":13.5,"dataTime":"2018-11-22 14:37:33","state":0,"status":"正常"}]},{"deviceNumber":"TH610018062702","companyName":"和平物流","vehicleNo":"渝A03W90","name":null,"type":null,"rs":null,"points":[{"maddress":"1","aname":"温度","bname":"温度1","min":0.0,"max":30.0,"data":9.1,"dataTime":"2018-11-22 14:36:25","state":0,"status":"正常"},{"maddress":"33","aname":"温度","bname":"温度2","min":0.0,"max":30.0,"data":8.9,"dataTime":"2018-11-22 14:36:25","state":0,"status":"正常"}]}]
+,"totalCount":2,"counter":{"total":2,"offline":0,"normal":2,"alert":0}}

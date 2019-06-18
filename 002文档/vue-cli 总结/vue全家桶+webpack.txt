@@ -1,0 +1,387 @@
+vuevue
+1. 全局安装 npm install --global vue-cli(附：npm的升级 npm install -g npm)
+2. 创建vue+webpack的初始项目,vue init webpack "项目名称",根据提示安装相应组件（包含：vue-router）
+3. 创建组件，在'.src/components'中新建组件（*.vue的模板见:'Note1'）
+3. 配置路由:  '.src/router/index' 中引入各组件进行路由配置
+4. 安装vue-resource, npm install vue-resource,之后在main.js中引入即可使用：import VueResource from 'vue-resource'
+                                                                           Vue.use(VueResource)
+5. 如果是中大型项目可安装vuex进行状态管理，npm install vuex --save,之后：   (参见--https://www.cnblogs.com/qiu-Ann/p/7483205.html)
+
+                                                                         1. '.src'目录下创建新文件夹 vuex(包含:actions.js, getters.js, index.js, mutations.js/各文件的示例见:'Note2')
+                                                                         2. main.js中引入，import store from './vuex/index' 和 new Vue({
+                                                                                                                                          el: '#app',
+                                                                                                                                          router,
+                                                                                                                                          store,  //添加进来
+                                                                                                                                          components: { App },
+                                                                                                                                          template: '<App/>'
+                                                                                                                                        })
+                                                                         3. 在需要使用的组件中引入，如下：<template>
+                                                                                                               <div id="app">
+                                                                                                                   Count is {{count}}//状态的使用
+                                                                                                                   <button @click="increment(3)">+3</button>  //方法的使用
+                                                                                                                   <button @click="decrement(2)">-2</button>
+                                                                                                                </div>
+                                                                                                             </template>
+                                                                                                             <script>
+                                                                                                                 import { mapGetters, mapActions } from 'vuex' // 引入mapActions，很重要
+                                                                                                                 export default{
+                                                                                                                      methods:{
+                                                                                                                          ...mapActions([
+                                                                                                                              'increment',
+                                                                                                                              'decrement',
+                                                                                                                              'setValue'
+                                                                                                                            ]),
+                                                                                                                       },
+                                                                                                                       computed:{
+
+                                                                                                                          ...mapGetters([
+                                                                                                                              'count',
+                                                                                                                               'test'
+                                                                                                                             
+                                                                                                                          ])
+                                                                                                                       } 
+    
+                                                                                                                 }
+                                                                                                             </script>
+
+5.1 当使用vuex后 某些浏览器会报错（vuex requires a Promise polyfill in this browser），解决方案：
+                 第一步： 安装 babel-polyfill 。 babel-polyfill可以模拟ES6使用的环境，可以使用ES6的所有新方法
+                              npm install --save babel-polyfill
+                第二步： 在webpack.base.config.js文件中，使用
+                               module.exports = {
+                                         entry: {
+                                              app: ["babel-polyfill", "./src/main.js"]
+                                        }
+                              }
+                              替换：
+                             module.exports = {
+                                      entry: {
+                                           app: './src/main.js'
+                                      }
+                           }
+6. （根据项目选择安装），安装less, npm install less less-loader --save, 之后在'./build/webpack.base.conf.js'中的module.exports{}中的module{}中添加： 
+                                                                                             {
+                                                                                                   test:/\.less$/,
+                                                                                                   loader:"style-loader!css-loader!less-loader"
+                                                                                              }
+                                                                                              在*.vue 中的<style lang="less" rel="stylesheet/less"></style>中使用
+
+7.（根据项目选择安装），安装element-ui,npm i element-ui -S,之后在main.js中引入即可使用： 
+                                                                   import ElementUI from 'element-ui'
+                                                                   import 'element-ui/lib/theme-chalk/index.css' 或  import 'element-ui/lib/theme-default/index.css' //看模块目录
+
+                                                                   Vue.use( ElementUI)
+
+8.(根据项目选择引入），引入bootstrap(推荐在'./index.html'中引入，参见-- https://blog.csdn.net/qq_37055675/article/details/73730736):
+
+                                                    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">  //确保手机模式下响应式的实现
+                                                    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                                                     
+                                                    <link rel="stylesheet" href="./static/bootstrap/css/bootstrap.css">
+                                                    <script src="./static/bootstrap/js/bootstrap.min.js"></script>
+
+9.(根据项目选择安装），flex.js适配移动端，npm i lib-flexible --save，之后：1. main.js中引入：import 'lib-flexible/flexible'
+                                                                           2. ./index.html中：<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+                                                                           3. 安装px2rem-loader，npm install px2rem-loader：//将写入的px自动转换为rem，做时只需按稿子（一般为750）的尺寸写多少px即可
+                                                                                                     1. 在build文件中找到util.js，将px2rem-loader添加到cssLoaders中，示例如下：
+                                                                                                                             const px2remLoader = {
+                                                                                                                                                     loader: 'px2rem-loader',
+                                                                                                                                                     options: {
+                                                                                                                                                          remUnit: 75  //1rem 为75px
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                      2. 再对util.js的generateLoaders方法做更改，添加px2remLoader：
+                                                                                                               原：
+                                                                                                                   function generateLoaders (loader, loaderOptions) {
+                                                                                                                         const loaders = options.usePostCSS ? [cssLoader, postcssLoader] : [cssLoader] 
+                                                                                                                         ...
+                                                                                                                    }
+                                                                                                               改后:
+                                                                                                                   function generateLoaders (loader, loaderOptions) {
+                                                                                                                         const loaders = options.usePostCSS ? [cssLoader, postcssLoader,px2remLoader] : [cssLoader] 
+                                                                                                                         ...
+                                                                                                                    }
+                                                                                                      3. 重启框架，即可见效果
+
+10.移动端适配的另外一种解决方案：在'./index.html'中添加一段代码：
+====>
+<script>
+
+fnResize()
+window.onresize = function () {
+fnResize()
+}
+function fnResize() {
+var deviceWidth = document.documentElement.clientWidth || window.innerWidth
+if (deviceWidth >= 750) {
+deviceWidth = 750
+}
+if (deviceWidth <= 320) {
+deviceWidth = 320
+}
+document.documentElement.style.fontSize = (deviceWidth / 7.5) + 'px'
+}
+
+</script>
+
+注：之后，在写css时，只要将px单位替换成rem，这里设置的比例是100px=1rem,例如，宽度为100px时，可以直接写成1rem。
+
+11. vue的另外一种用的较多的网络请求：axios
+      （1）npm install axios -S
+      （2）配置axios：在项目中新建api/index.js文件，用以配置axios
+              api/index.js内容：
+              <=============================================代码 下===================================================>
+                    //1.引入
+                      import axios from 'axios';
+
+                   //2.声明子对象
+                      let http = axios.create({
+                           baseURL: 'http://localhost:8080/',
+                           withCredentials: true,
+                           headers: {
+                                 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+                                       },
+                          transformRequest: [function (data) {
+                                          let newData = '';
+                                          for (let k in data) {
+                                                   if (data.hasOwnProperty(k) === true) {
+                                                   newData += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&';
+                                                   }
+                                         }
+                                         return newData;
+                                      }]
+                       });
+
+                   //3. axios 对应函数
+                    function apiAxios(method, url, params, response) {
+                                          http({
+                                                method: method,
+                                                url: url,
+                                                data: method === 'POST' || method === 'PUT' ? params : null,
+                                                params: method === 'GET' || method === 'DELETE' ? params : null,
+                                             }).then(function (res) {
+                                                   response(res);
+                                             }).catch(function (err) {
+                                                   response(err);
+                                              })
+                      }
+             
+             //4. 导出axios的网络请求方法
+             export default {
+                        get: function (url, params, response) {
+                                  return apiAxios('GET', url, params, response)
+                        },
+                       post: function (url, params, response) {
+                                return apiAxios('POST', url, params, response)
+                       },
+                      put: function (url, params, response) {
+                               return apiAxios('PUT', url, params, response)
+                      },
+                     delete: function (url, params, response) {
+                               return apiAxios('DELETE', url, params, response)
+                     }
+             }
+          <==============================================代码 上===================================================>
+             这里的配置了POST、GET、PUT、DELETE方法。并且自动将JSON格式数据转为URL拼接的方式
+
+             同时配置了跨域，不需要的话将withCredentials设置为false即可
+
+             并且设置了默认头部地址为：http://localhost:8080/，这样调用的时候只需写访问方法即可
+      （3）使用axios
+                 注：PUT请求默认会发送两次请求，第一次预检请求不含参数，所以后端不能对PUT请求地址做参数限制
+
+               a. 首先在main.js中引入方法
+                      import Api from './api/index.js';
+                       Vue.prototype.$api = Api;
+               b. 然后在需要的地方调用即可
+                      this.$api.post('user/login.do(地址)', {
+                             "参数名": "参数值"
+                           }, response => {
+                                 if (response.status >= 200 && response.status < 300) {
+                                     console.log(response.data);\\请求成功，response为成功信息参数
+                                 } else {
+                                     console.log(response.message);\\请求失败，response为失败信息
+                                 }
+                       });
+11.1 aoxis 的简单使用类似 vue-resource
+        第一步：npm install axios --save
+        第二步：在main.js中引入axios
+                     import axios from "axios";
+                     Vue.prototype.$axios = axios;
+       第三步：使用：
+                   created:function(){
+
+                          this.$axios.get("/seller",{"id":123}).then(res=>{
+
+                                 console.log(res.data);
+
+                         });
+
+                  }
+                 注：如遇后台是body方式传值: import qs from 'qs'
+                                                                    qs.stringify({
+                                                                            key:value   //传参
+
+                                                                      })
+
+12. vue 中echarts的使用
+
+   （1）npm install echarts -S
+   （2）main.js中
+         // 引入echarts
+         import echarts from 'echarts'
+         Vue.prototype.$echarts = echarts 
+
+13. vue 中使用mint-ui
+     (1) npm install mint-ui -S
+     (2) main.js中引入全部组件（亦可 按需引入   https://mint-ui.github.io/#!/zh-cn / mint-ui网站）
+           import "mint-ui/lib/style.css"  //引入样式
+           import Mint from 'mint-ui';
+           Vue.use(Mint);
+14. vue 中sass的使用
+     （1）npm  install sass-loader --save-dev
+           
+             npm install node-sass --sava-dev （如果安装失败可使用淘宝镜像，npm install -g cnpm --registry=https://registry.npm.taobao.org  （安装淘宝镜像）,再安装：cnpm install node-sass  --save ）
+     （2）在build文件夹下的webpack.base.conf.js的rules里面添加配置
+              {
+                 test: /\.scss$/,
+                 loaders: ['style', 'css', 'sass']
+              }
+     （3）使用scss时候在所在的style样式标签上添加lang=”scss”即可应用对应的语法，否则报错
+     （4）scss使用测试：如下测试修改字体颜色
+             <style lang="scss">
+                 $color:red;
+                div {color:$color;}
+            </style>
+15. vue app 项目  web-cli+flexible.js+sass+mintUI (详见myFirstVueApp,base文件中有css文件夹有处理字体，宽度，图片的scss配置)（参考：https://www.cnblogs.com/zhengrunlin/p/7226463.html）
+      1. 按vue方式编写代码
+      2. 代码完成后打包，打包前将config-->index.js-->build.assetsPublicPath: './', 之后npm run build 打包
+      3. 在Hbuilder 中将项目打包详见, vue打包成app.doc(参见:https://blog.csdn.net/ytangdigl/article/details/78978196)
+      4. 可在模拟器上测试,以夜神模拟器为例(安装后直接将apk拖入即可安装测试)
+      webstorm连接真机调试参考：https://docs.apicloud.com/Dev-Tools/webStorm-wifi-sync#a1
+      注：vue-cli + ui-app可适合多端：android/ios(app), 小程序，h5网页
+16. vue-cli 中使用百度富文本编辑器：
+      1.  npm：npm i vue-ueditor-wrap， 安装插件
+      2.  https://github.com/HaoChuan9421/vue-ueditor-wrap/tree/master/assets/downloads，该路径中下载修复果bug,并可双相绑定的editor 压缩包，选着合适的下载并解压将文件名改为‘UEditor’放到static文件中，
+           在要使用的地方引入（可全局，即可配置为全局变量:  import VueUeditorWrap from 'vue-ueditor-wrap' // ES6 Module或 const VueUeditorWrap = require('vue-ueditor-wrap') // CommonJS, Vue.component('vue-ueditor-wrap', VueUeditorWrap）或只在使用的的组件中引入注册组件：
+                    components:{
+                         'vue-ueditor-wrap':VueUeditorWrap
+                    }
+     3. 实现数据的双向绑定和业务的初始配置
+         <vue-ueditor-wrap v-model="msg" :config="myConfig"></vue-ueditor-wrap>
+
+          return {
+   
+               msg: '<h2><img src="http://img.baidu.com/hi/jx2/j_0003.gif"/>Vue + UEditor + v-model双向绑定</h2>',
+    
+               myConfig: {
+      
+                     // 编辑器不自动被内容撑高
+     
+                     autoHeightEnabled: false,
+      
+                    // 初始容器高度
+     
+                     initialFrameHeight: 240,
+     
+                   // 初始容器宽度
+      
+                    initialFrameWidth: '100%',
+      
+                   // 上传文件接口（这个地址是为了方便各位体验文件上传功能搭建的临时接口，请勿在生产环境使用！！！）
+      
+                   serverUrl: 'http://35.201.165.105:8000/controller.php',
+     
+                   // UEditor 资源文件的存放路径，如果你使用的是 vue-cli 生成的项目，通常不需要设置该选项，vue-ueditor-wrap 会自动处理常见的情况，如果需要特殊配置，参考下方的常见问题2
+     
+                   UEDITOR_HOME_URL: '/static/UEditor/'
+   
+              }
+      }
+      
+Note1: 
+==============================>
+<template>
+    <div>首页</div>
+</template>
+<script type="text/ecmascript-6">
+    export default {
+        name: 'app',
+        data() {
+            return {
+                num1: 1
+            };
+        },
+        computed:{
+
+        },
+        methods: {
+           
+        },
+      created(){
+      
+      }
+    }
+</script>
+<style lang="less" rel="stylesheet/less">
+
+</style>
+
+Note2:
+============================>
+mutations.js:
+
+// 状态值的改变方法,操作状态值
+// 提交mutations是更改Vuex状态的唯一方法
+export const increment = (state,num1) => {
+  state.count = state.count + num1
+}
+
+export const decrement = (state,num2)=> {
+  state.count=state.count-num2
+}
+
+export const setValue = (state)=> {
+  state.count=6
+}
+----------------------------------------------------------------------------------------------
+actions.js:
+
+//actions 注册事件处理函数，当这个函数被触发时，将状态提交到 mutaions中处理, num1,num2为参数
+export const increment = ({ commit },num1) => commit('increment',num1)
+export const decrement = ({ commit },num2) => commit('decrement',num2)
+export const setValue = ({ commit }) => commit('setValue')
+----------------------------------------------------------------------------------------------
+getters.js:
+
+export const count = state => state.count
+export const test = state => state.test
+----------------------------------------------------------------------------------------------
+index.js:
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+import * as getters from './getters'
+import * as actions from './actions'
+import * as mutations from './mutations'
+
+Vue.use(Vuex)
+// 首先声明一个状态 state
+const state = {
+  count: 0,
+  test:"测试"
+}
+
+
+// 下面这个相当关键了，所有模块，记住是所有，注册才能使用
+const store=new Vuex.Store({
+  state,
+  getters,
+  actions,
+  mutations
+});
+export default store;
+
+额外：
+<!--解决在国产浏览器兼容模式下不展示的问题-->
+<script src="https://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.min.js"></script>
